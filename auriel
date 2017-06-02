@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# Auriel
+# A package manager for the Arch User Repository (AUR)
+
+AUR_BASE_URL="https://aur.archlinux.org"
+AURIEL_DIR="$(readlink -e ${BASH_SOURCE[0]})"
+AURIEL_SOURCE_DIR="$AURIEL_DIR/src"
+AURIEL_REPO_DIR="$AURIEL_DIR/repo"
+
+AURIEL_MAKEPKG_OPTS="-sricC --needed --noconfirm --noprogressbar"
+
+source "$AURIEL_SOURCE_DIR/common.sh"
+
+if [ ! -e "$AURIEL_REPO_DIR" ]
+then
+    mkdir -p "$AURIEL_REPO_DIR"
+fi
+
+if [ ! -e "$AURIEL_REPO_DIR/.git" ]
+then
+    git init -q "$AURIEL_REPO_DIR"
+fi
+
+CMD="$1"
+CMD_SCRIPT_PATH="$AURIEL_SOURCE_DIR/cmd-$CMD.sh"
+
+# this allows users to ask for help both as a command, and an option
+if [ "$1" == "--help" ]
+then
+    CMD="help"
+fi
+
+shift
+
+if [ ! -f "$CMD_SCRIPT_PATH" ]
+then
+    fatal "'$cmd' is not an auriel command. See 'auriel --help'."
+fi
+
+if [ ! -r "$CMD_SCRIPT_PATH" ]
+then
+    fatal "'$CMD_SCRIPT_PATH' is not readable by this user. Ensure auriel\
+ is properly installed."
+fi
+
+source "$CMD_SCRIPT_PATH" 
+
